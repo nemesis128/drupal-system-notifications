@@ -1,0 +1,141 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the admin_notifications module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function admin_notifications_schema() {
+  $schema['admin_notifications'] = [
+    'description' => 'Almacena las notificaciones administrativas.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'ID único de la notificación.',
+      ],
+      'title' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Título de la notificación.',
+      ],
+      'message' => [
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => 'Cuerpo del mensaje de la notificación.',
+      ],
+      'type' => [
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => 'realtime',
+        'description' => 'Tipo de notificación: realtime o banner.',
+      ],
+      'severity' => [
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => 'info',
+        'description' => 'Nivel de severidad: info, warning, error, success.',
+      ],
+      'status' => [
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => 'draft',
+        'description' => 'Estado: draft, active, completed.',
+      ],
+      'start_date' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Fecha de inicio (timestamp).',
+      ],
+      'end_date' => [
+        'type' => 'int',
+        'not null' => FALSE,
+        'description' => 'Fecha de fin (timestamp).',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Fecha de creación (timestamp).',
+      ],
+      'created_by' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'UID del usuario que creó la notificación.',
+      ],
+      'updated' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Fecha de última actualización (timestamp).',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'type' => ['type'],
+      'status' => ['status'],
+      'start_date' => ['start_date'],
+      'end_date' => ['end_date'],
+    ],
+  ];
+
+  $schema['admin_notifications_read'] = [
+    'description' => 'Rastrea qué usuarios han leído qué notificaciones.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'ID único del registro.',
+      ],
+      'notification_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'ID de la notificación.',
+      ],
+      'uid' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'UID del usuario.',
+      ],
+      'read_timestamp' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp cuando se marcó como leída.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'notification_id' => ['notification_id'],
+      'uid' => ['uid'],
+      'notification_uid' => ['notification_id', 'uid'],
+    ],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function admin_notifications_install() {
+  \Drupal::messenger()->addStatus(__FUNCTION__);
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function admin_notifications_uninstall() {
+  // Limpiar configuración
+  \Drupal::configFactory()->getEditable('admin_notifications.settings')->delete();
+}

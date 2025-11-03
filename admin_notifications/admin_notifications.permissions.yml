@@ -1,0 +1,8 @@
+administer admin notifications:
+  title: 'Administrar notificaciones del sistema'
+  description: 'Crear, editar y eliminar notificaciones administrativas'
+  restrict access: true
+
+view admin notifications:
+  title: 'Ver notificaciones administrativas'
+  description: 'Permite ver las notificaciones en tiempo real y banners'

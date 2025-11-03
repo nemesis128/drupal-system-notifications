@@ -1,0 +1,18 @@
+# Schema for the configuration files of the Admin Notifications module.
+
+admin_notifications.settings:
+  type: config_object
+  label: 'Admin Notifications settings'
+  mapping:
+    poll_interval:
+      type: integer
+      label: 'Poll interval in milliseconds'
+    toast_duration:
+      type: integer
+      label: 'Toast notification duration in milliseconds'
+    toast_position:
+      type: string
+      label: 'Toast notification position'
+    sound_enabled:
+      type: boolean
+      label: 'Enable notification sound'

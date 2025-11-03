@@ -1,0 +1,30 @@
+notifications:
+  version: 1.0
+  js:
+    js/admin-notifications.js: {}
+  css:
+    theme:
+      css/admin-notifications.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery
+
+toast:
+  version: 1.0
+  js:
+    js/toast-notifications.js: {}
+  css:
+    theme:
+      css/toast-notifications.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+
+banner:
+  version: 1.0
+  css:
+    theme:
+      css/banner-notifications.css: {}
+  dependencies:
+    - core/drupal

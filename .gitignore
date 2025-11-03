@@ -1,0 +1,16 @@
+# Archivos de Claude Code
+.claude/
+.claudecontext.md
+*.md
+*.txt
+
+# Archivos temporales
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Archivos de IDE
+.idea/
+.vscode/
+*.sublime-*

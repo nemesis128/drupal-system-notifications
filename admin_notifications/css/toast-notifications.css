@@ -1,0 +1,180 @@
+/**
+ * @file
+ * Estilos para notificaciones toast estilo Windows.
+ */
+
+/* Contenedor principal */
+.toast-notifications-container {
+  position: fixed;
+  z-index: 999999;
+  width: 380px;
+  padding: 16px;
+  pointer-events: none;
+  display: block !important;
+  overflow: visible !important;
+  height: auto !important;
+}
+
+/* Posición inferior derecha */
+.toast-notifications-container--bottom-right {
+  bottom: 0;
+  right: 0;
+}
+
+/* Posición inferior izquierda */
+.toast-notifications-container--bottom-left {
+  bottom: 0;
+  left: 0;
+}
+
+/* Posición superior derecha */
+.toast-notifications-container--top-right {
+  top: 0;
+  right: 0;
+}
+
+/* Posición superior izquierda */
+.toast-notifications-container--top-left {
+  top: 0;
+  left: 0;
+}
+
+/* Toast individual */
+.toast-notification {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  pointer-events: auto;
+  position: relative;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+}
+
+/* Toast visible */
+.toast-notification--visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Animación para posiciones izquierdas */
+.toast-notifications-container--top-left .toast-notification,
+.toast-notifications-container--bottom-left .toast-notification {
+  transform: translateX(-100%);
+}
+
+.toast-notifications-container--top-left .toast-notification--visible,
+.toast-notifications-container--bottom-left .toast-notification--visible {
+  transform: translateX(0);
+}
+
+/* Barra de color lateral */
+.toast-notification::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 8px 0 0 8px;
+}
+
+.toast-notification--info::before {
+  background: #2196f3;
+}
+
+.toast-notification--success::before {
+  background: #4caf50;
+}
+
+.toast-notification--warning::before {
+  background: #ff9800;
+}
+
+.toast-notification--error::before {
+  background: #f44336;
+}
+
+/* Icono */
+.toast-notification__icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+}
+
+.toast-notification--info .toast-notification__icon {
+  background: #e3f2fd;
+  color: #2196f3;
+}
+
+.toast-notification--success .toast-notification__icon {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+
+.toast-notification--warning .toast-notification__icon {
+  background: #fff3e0;
+  color: #ff9800;
+}
+
+.toast-notification--error .toast-notification__icon {
+  background: #ffebee;
+  color: #f44336;
+}
+
+/* Contenido */
+.toast-notification__content {
+  flex: 1;
+}
+
+.toast-notification__title {
+  font-weight: 600;
+  font-size: 15px;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.toast-notification__message {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Botón cerrar */
+.toast-notification__close {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #999;
+  flex-shrink: 0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-notification__close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .toast-notifications-container {
+    width: 100%;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 8px;
+  }
+}

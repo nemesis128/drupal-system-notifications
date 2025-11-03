@@ -1,0 +1,6 @@
+admin_notifications.admin:
+  title: 'Notificaciones Administrativas'
+  description: 'Gestionar notificaciones del sistema'
+  parent: system.admin_config_system
+  route_name: admin_notifications.list
+  weight: 10

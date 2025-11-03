@@ -1,0 +1,12 @@
+name: 'Admin Notifications'
+description: 'Sistema de notificaciones administrativas con alertas banner y notificaciones en tiempo real'
+type: module
+core_version_requirement: ^10
+package: 'Custom'
+
+dependencies:
+  - drupal:user
+  - drupal:system
+  - drupal:datetime
+
+configure: admin_notifications.settings

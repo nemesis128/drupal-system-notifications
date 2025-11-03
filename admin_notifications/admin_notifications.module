@@ -1,0 +1,142 @@
+<?php
+
+/**
+ * @file
+ * Módulo de notificaciones administrativas.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function admin_notifications_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.admin_notifications':
+      $output = '<h3>' . t('Acerca de') . '</h3>';
+      $output .= '<p>' . t('El módulo de Notificaciones Administrativas permite crear y gestionar notificaciones para usuarios con permisos administrativos.') . '</p>';
+      $output .= '<h3>' . t('Tipos de notificaciones') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Notificaciones en tiempo real') . '</dt>';
+      $output .= '<dd>' . t('Aparecen inmediatamente como una notificación tipo toast en la esquina inferior derecha de la pantalla.') . '</dd>';
+      $output .= '<dt>' . t('Notificaciones banner programadas') . '</dt>';
+      $output .= '<dd>' . t('Se muestran como un banner en la parte superior del área de administración en la fecha programada.') . '</dd>';
+      $output .= '</dl>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function admin_notifications_page_attachments(array &$attachments) {
+  $user = \Drupal::currentUser();
+
+  // Solo cargar las librerías para usuarios con permisos
+  if ($user->hasPermission('view admin notifications') ||
+      $user->hasPermission('access administration pages')) {
+
+    // Adjuntar librerías JavaScript y CSS
+    $attachments['#attached']['library'][] = 'admin_notifications/notifications';
+    $attachments['#attached']['library'][] = 'admin_notifications/toast';
+
+    // Configuración para JavaScript
+    $attachments['#attached']['drupalSettings']['adminNotifications'] = [
+      'pollInterval' => \Drupal::config('admin_notifications.settings')->get('poll_interval') ?? 30000,
+      'enabled' => TRUE,
+      'userId' => $user->id(),
+    ];
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function admin_notifications_cron() {
+  // Limpiar notificaciones antiguas leídas (más de 30 días)
+  $database = \Drupal::database();
+  $expiration = strtotime('-30 days');
+
+  $database->delete('admin_notifications_read')
+    ->condition('read_timestamp', $expiration, '<')
+    ->execute();
+
+  // Limpiar notificaciones expiradas
+  $database->delete('admin_notifications')
+    ->condition('status', 'active')
+    ->condition('end_date', REQUEST_TIME, '<')
+    ->isNotNull('end_date')
+    ->execute();
+}
+
+/**
+ * Implements hook_theme().
+ */
+function admin_notifications_theme($existing, $type, $theme, $path) {
+  return [
+    'admin_notification_banner' => [
+      'variables' => [
+        'title' => NULL,
+        'message' => NULL,
+        'type' => 'info',
+        'notification_id' => NULL,
+      ],
+      'template' => 'admin-notification-banner',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_page_top().
+ */
+function admin_notifications_page_top(array &$page_top) {
+  $user = \Drupal::currentUser();
+
+  // Solo mostrar banners a usuarios con permisos
+  if (!$user->hasPermission('view admin notifications') &&
+      !$user->hasPermission('access administration pages')) {
+    return;
+  }
+
+  // Obtener notificaciones banner activas
+  $database = \Drupal::database();
+  $current_time = REQUEST_TIME;
+
+  $query = $database->select('admin_notifications', 'an')
+    ->fields('an')
+    ->condition('an.type', 'banner')
+    ->condition('an.status', 'active')
+    ->condition('an.start_date', $current_time, '<=');
+
+  // Filtrar por fecha de fin si existe
+  $or_group = $query->orConditionGroup()
+    ->condition('an.end_date', $current_time, '>=')
+    ->isNull('an.end_date');
+  $query->condition($or_group);
+
+  $notifications = $query->execute()->fetchAll();
+
+  // Verificar cuáles no han sido leídas por el usuario
+  foreach ($notifications as $notification) {
+    $read = $database->select('admin_notifications_read', 'anr')
+      ->condition('notification_id', $notification->id)
+      ->condition('uid', $user->id())
+      ->countQuery()
+      ->execute()
+      ->fetchField();
+
+    if (!$read) {
+      $page_top['admin_notification_banner_' . $notification->id] = [
+        '#theme' => 'admin_notification_banner',
+        '#title' => $notification->title,
+        '#message' => $notification->message,
+        '#type' => $notification->severity,
+        '#notification_id' => $notification->id,
+        '#attached' => [
+          'library' => ['admin_notifications/banner'],
+        ],
+        '#weight' => -100,
+      ];
+    }
+  }
+}

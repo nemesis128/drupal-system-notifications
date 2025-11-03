@@ -1,0 +1,56 @@
+admin_notifications.add:
+  path: '/admin/config/system/admin-notifications/add'
+  defaults:
+    _form: '\Drupal\admin_notifications\Form\AdminNotificationForm'
+    _title: 'Crear Nueva Notificación'
+  requirements:
+    _permission: 'administer admin notifications'
+
+admin_notifications.list:
+  path: '/admin/config/system/admin-notifications'
+  defaults:
+    _controller: '\Drupal\admin_notifications\Controller\AdminNotificationListController::list'
+    _title: 'Notificaciones Administrativas'
+  requirements:
+    _permission: 'administer admin notifications'
+
+admin_notifications.settings:
+  path: '/admin/config/system/admin-notifications/settings'
+  defaults:
+    _form: '\Drupal\admin_notifications\Form\AdminNotificationSettingsForm'
+    _title: 'Configuración de Notificaciones'
+  requirements:
+    _permission: 'administer admin notifications'
+
+admin_notifications.delete:
+  path: '/admin/config/system/admin-notifications/{notification_id}/delete'
+  defaults:
+    _form: '\Drupal\admin_notifications\Form\AdminNotificationDeleteForm'
+    _title: 'Eliminar Notificación'
+  requirements:
+    _permission: 'administer admin notifications'
+
+admin_notifications.edit:
+  path: '/admin/config/system/admin-notifications/{notification_id}/edit'
+  defaults:
+    _form: '\Drupal\admin_notifications\Form\AdminNotificationForm'
+    _title: 'Editar Notificación'
+  requirements:
+    _permission: 'administer admin notifications'
+
+admin_notifications.poll:
+  path: '/admin-notifications/poll'
+  defaults:
+    _controller: '\Drupal\admin_notifications\Controller\AdminNotificationPollController::poll'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    no_cache: true
+
+admin_notifications.mark_read:
+  path: '/admin-notifications/mark-read/{notification_id}'
+  defaults:
+    _controller: '\Drupal\admin_notifications\Controller\AdminNotificationPollController::markRead'
+  requirements:
+    _permission: 'access administration pages'
+  methods: [POST]

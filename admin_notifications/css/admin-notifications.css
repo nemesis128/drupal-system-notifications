@@ -1,0 +1,58 @@
+/**
+ * @file
+ * Estilos generales para el módulo de notificaciones administrativas.
+ */
+
+/* Estilos para la lista de notificaciones en admin */
+.admin-notifications-actions {
+  margin-bottom: 1.5rem;
+}
+
+.admin-notifications-list {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-notifications-list th {
+  background-color: #f5f5f5;
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #ddd;
+}
+
+.admin-notifications-list td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.admin-notifications-list tr:hover {
+  background-color: #f9f9f9;
+}
+
+.admin-notifications-list .button {
+  margin-right: 0.25rem;
+}
+
+.admin-notifications-list .button--danger {
+  background-color: #d32f2f;
+  color: white;
+}
+
+.admin-notifications-list .button--danger:hover {
+  background-color: #b71c1c;
+}
+
+/* Estilos para formularios */
+.admin-notification-form .form-item {
+  margin-bottom: 1.5rem;
+}
+
+.admin-notification-form .form-type-radios label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.admin-notification-form .form-type-radios .form-radio {
+  margin-right: 0.5rem;
+}
