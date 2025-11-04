@@ -36,11 +36,12 @@
 
 .admin-notifications-list .button--danger {
   background-color: #d32f2f;
-  color: white;
+  color: white !important;
 }
 
 .admin-notifications-list .button--danger:hover {
   background-color: #b71c1c;
+  color: white !important;
 }
 
 /* Estilos para formularios */

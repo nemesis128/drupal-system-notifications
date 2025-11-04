@@ -87,10 +87,13 @@
 
     showToastNotification: function (notification) {
       if (typeof Drupal.toastNotifications !== 'undefined') {
+        // Usar la duración configurada del módulo toast
+        const duration = Drupal.toastNotifications.toastDuration;
         Drupal.toastNotifications.show(
           notification.title,
           notification.message,
-          notification.severity
+          notification.severity,
+          duration
         );
       }
     },
