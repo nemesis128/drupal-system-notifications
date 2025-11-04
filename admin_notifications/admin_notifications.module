@@ -41,8 +41,12 @@ function admin_notifications_page_attachments(array &$attachments) {
     $attachments['#attached']['library'][] = 'admin_notifications/toast';
 
     // Configuración para JavaScript
+    $config = \Drupal::config('admin_notifications.settings');
     $attachments['#attached']['drupalSettings']['adminNotifications'] = [
-      'pollInterval' => \Drupal::config('admin_notifications.settings')->get('poll_interval') ?? 30000,
+      'pollInterval' => $config->get('poll_interval') ?? 30000,
+      'toast_duration' => $config->get('toast_duration') ?? 10000,
+      'toast_position' => $config->get('toast_position') ?? 'bottom-right',
+      'sound_enabled' => $config->get('sound_enabled') ?? TRUE,
       'enabled' => TRUE,
       'userId' => $user->id(),
     ];
