@@ -3,6 +3,7 @@
 .claudecontext.md
 *.md
 *.txt
+!README.md
 
 # Archivos temporales
 *.swp
