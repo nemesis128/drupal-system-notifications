@@ -1,0 +1,157 @@
+# Japanese translation for Admin Notifications module
+# Copyright (c) 2025
+# This file is distributed under the same license as the Drupal package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Admin Notifications\n"
+"POT-Creation-Date: 2025-01-04\n"
+"PO-Revision-Date: 2025-01-04\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+# Menu and navigation
+msgid "Admin Notifications"
+msgstr "管理通知"
+
+msgid "Administrative Notifications"
+msgstr "管理通知"
+
+msgid "Manage system notifications"
+msgstr "システム通知を管理"
+
+# Permissions
+msgid "Administer admin notifications"
+msgstr "管理通知を管理"
+
+msgid "Create, edit and delete administrative notifications"
+msgstr "管理通知の作成、編集、削除"
+
+msgid "View admin notifications"
+msgstr "管理通知を表示"
+
+msgid "Allows viewing administrative notifications in real-time and banners"
+msgstr "リアルタイム通知とバナーの表示を許可"
+
+# Form labels
+msgid "Title"
+msgstr "タイトル"
+
+msgid "Message"
+msgstr "メッセージ"
+
+msgid "Type"
+msgstr "タイプ"
+
+msgid "Severity"
+msgstr "重大度"
+
+msgid "Status"
+msgstr "ステータス"
+
+msgid "Start date"
+msgstr "開始日"
+
+msgid "End date"
+msgstr "終了日"
+
+msgid "Real-time (Toast)"
+msgstr "リアルタイム（トースト）"
+
+msgid "Banner (Scheduled)"
+msgstr "バナー（スケジュール済み）"
+
+msgid "Info"
+msgstr "情報"
+
+msgid "Success"
+msgstr "成功"
+
+msgid "Warning"
+msgstr "警告"
+
+msgid "Error"
+msgstr "エラー"
+
+msgid "Draft"
+msgstr "下書き"
+
+msgid "Active"
+msgstr "アクティブ"
+
+msgid "Completed"
+msgstr "完了"
+
+# Buttons
+msgid "Save"
+msgstr "保存"
+
+msgid "Delete"
+msgstr "削除"
+
+msgid "Cancel"
+msgstr "キャンセル"
+
+msgid "Edit"
+msgstr "編集"
+
+msgid "Add notification"
+msgstr "通知を追加"
+
+msgid "Close notification"
+msgstr "通知を閉じる"
+
+# Settings
+msgid "Admin Notifications Settings"
+msgstr "管理通知設定"
+
+msgid "Poll interval (milliseconds)"
+msgstr "ポーリング間隔（ミリ秒）"
+
+msgid "Toast duration (milliseconds)"
+msgstr "トースト表示時間（ミリ秒）"
+
+msgid "Toast position"
+msgstr "トースト位置"
+
+msgid "Enable notification sound"
+msgstr "通知音を有効化"
+
+msgid "Top left"
+msgstr "左上"
+
+msgid "Top right"
+msgstr "右上"
+
+msgid "Bottom left"
+msgstr "左下"
+
+msgid "Bottom right"
+msgstr "右下"
+
+# Messages
+msgid "Notification created successfully."
+msgstr "通知が正常に作成されました。"
+
+msgid "Notification updated successfully."
+msgstr "通知が正常に更新されました。"
+
+msgid "Notification deleted successfully."
+msgstr "通知が正常に削除されました。"
+
+msgid "No notifications found."
+msgstr "通知が見つかりません。"
+
+# Table headers
+msgid "ID"
+msgstr "ID"
+
+msgid "Created"
+msgstr "作成日時"
+
+msgid "Operations"
+msgstr "操作"

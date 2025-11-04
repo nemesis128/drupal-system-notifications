@@ -1,0 +1,157 @@
+# Spanish translation for Admin Notifications module
+# Copyright (c) 2025
+# This file is distributed under the same license as the Drupal package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Admin Notifications\n"
+"POT-Creation-Date: 2025-01-04\n"
+"PO-Revision-Date: 2025-01-04\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Menu and navigation
+msgid "Admin Notifications"
+msgstr "Notificaciones Administrativas"
+
+msgid "Administrative Notifications"
+msgstr "Notificaciones Administrativas"
+
+msgid "Manage system notifications"
+msgstr "Gestionar notificaciones del sistema"
+
+# Permissions
+msgid "Administer admin notifications"
+msgstr "Administrar notificaciones administrativas"
+
+msgid "Create, edit and delete administrative notifications"
+msgstr "Crear, editar y eliminar notificaciones administrativas"
+
+msgid "View admin notifications"
+msgstr "Ver notificaciones administrativas"
+
+msgid "Allows viewing administrative notifications in real-time and banners"
+msgstr "Permite ver las notificaciones administrativas en tiempo real y banners"
+
+# Form labels
+msgid "Title"
+msgstr "Título"
+
+msgid "Message"
+msgstr "Mensaje"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Severity"
+msgstr "Severidad"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Start date"
+msgstr "Fecha de inicio"
+
+msgid "End date"
+msgstr "Fecha de fin"
+
+msgid "Real-time (Toast)"
+msgstr "Tiempo real (Toast)"
+
+msgid "Banner (Scheduled)"
+msgstr "Banner (Programado)"
+
+msgid "Info"
+msgstr "Información"
+
+msgid "Success"
+msgstr "Éxito"
+
+msgid "Warning"
+msgstr "Advertencia"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Draft"
+msgstr "Borrador"
+
+msgid "Active"
+msgstr "Activo"
+
+msgid "Completed"
+msgstr "Completado"
+
+# Buttons
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "Add notification"
+msgstr "Agregar notificación"
+
+msgid "Close notification"
+msgstr "Cerrar notificación"
+
+# Settings
+msgid "Admin Notifications Settings"
+msgstr "Configuración de Notificaciones Administrativas"
+
+msgid "Poll interval (milliseconds)"
+msgstr "Intervalo de consulta (milisegundos)"
+
+msgid "Toast duration (milliseconds)"
+msgstr "Duración de toast (milisegundos)"
+
+msgid "Toast position"
+msgstr "Posición del toast"
+
+msgid "Enable notification sound"
+msgstr "Habilitar sonido de notificación"
+
+msgid "Top left"
+msgstr "Superior izquierda"
+
+msgid "Top right"
+msgstr "Superior derecha"
+
+msgid "Bottom left"
+msgstr "Inferior izquierda"
+
+msgid "Bottom right"
+msgstr "Inferior derecha"
+
+# Messages
+msgid "Notification created successfully."
+msgstr "Notificación creada exitosamente."
+
+msgid "Notification updated successfully."
+msgstr "Notificación actualizada exitosamente."
+
+msgid "Notification deleted successfully."
+msgstr "Notificación eliminada exitosamente."
+
+msgid "No notifications found."
+msgstr "No se encontraron notificaciones."
+
+# Table headers
+msgid "ID"
+msgstr "ID"
+
+msgid "Created"
+msgstr "Creado"
+
+msgid "Operations"
+msgstr "Operaciones"
