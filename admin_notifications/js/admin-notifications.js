@@ -10,12 +10,18 @@
     lastCheck: 0,
     pollTimer: null,
     pollInterval: 30000, // 30 segundos por defecto
+    initialized: false, // Flag para evitar múltiples inicializaciones
 
     attach: function (context, settings) {
       const self = this;
 
-      // Solo ejecutar una vez
-      if (context !== document) {
+      // Evitar múltiples inicializaciones
+      if (this.initialized) {
+        return;
+      }
+
+      // Solo ejecutar si el documento está listo y tenemos los settings
+      if (!settings.adminNotifications) {
         return;
       }
 
@@ -33,6 +39,9 @@
       // notificaciones recientes que podrían haberse creado antes de cargar la página
       const fiveMinutesAgo = Math.floor(Date.now() / 1000) - 300;
       this.lastCheck = fiveMinutesAgo;
+
+      // Marcar como inicializado
+      this.initialized = true;
 
       // Iniciar polling
       this.startPolling();
@@ -80,7 +89,7 @@
           }
         },
         error: function (xhr, status, error) {
-          console.error('Error polling notifications:', error);
+          console.error('Admin Notifications: Error polling notifications:', error);
         }
       });
     },
@@ -127,6 +136,7 @@
       if (trigger === 'unload' && this.pollTimer) {
         clearInterval(this.pollTimer);
         this.pollTimer = null;
+        this.initialized = false;
       }
     }
   };

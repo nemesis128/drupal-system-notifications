@@ -57,20 +57,39 @@ function admin_notifications_page_attachments(array &$attachments) {
  * Implements hook_cron().
  */
 function admin_notifications_cron() {
-  // Limpiar notificaciones antiguas leídas (más de 30 días)
-  $database = \Drupal::database();
-  $expiration = strtotime('-30 days');
+  try {
+    $database = \Drupal::database();
+    $expiration = strtotime('-30 days');
 
-  $database->delete('admin_notifications_read')
-    ->condition('read_timestamp', $expiration, '<')
-    ->execute();
+    // Limpiar notificaciones antiguas leídas (más de 30 días)
+    $deleted_read = $database->delete('admin_notifications_read')
+      ->condition('read_timestamp', $expiration, '<')
+      ->execute();
 
-  // Limpiar notificaciones expiradas
-  $database->delete('admin_notifications')
-    ->condition('status', 'active')
-    ->condition('end_date', REQUEST_TIME, '<')
-    ->isNotNull('end_date')
-    ->execute();
+    if ($deleted_read > 0) {
+      \Drupal::logger('admin_notifications')->info('Cron: Deleted @count old read notification records', [
+        '@count' => $deleted_read,
+      ]);
+    }
+
+    // Limpiar notificaciones expiradas
+    $deleted_notifications = $database->delete('admin_notifications')
+      ->condition('status', 'active')
+      ->condition('end_date', REQUEST_TIME, '<')
+      ->isNotNull('end_date')
+      ->execute();
+
+    if ($deleted_notifications > 0) {
+      \Drupal::logger('admin_notifications')->info('Cron: Deleted @count expired notifications', [
+        '@count' => $deleted_notifications,
+      ]);
+    }
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('admin_notifications')->error('Error during cron cleanup: @message', [
+      '@message' => $e->getMessage(),
+    ]);
+  }
 }
 
 /**
