@@ -275,7 +275,7 @@ drush watchdog:tail --filter=admin_notifications
 
 ## Testing
 
-El módulo incluye tests unitarios para validar la lógica de negocio.
+El módulo incluye una suite completa de tests: Unit, Kernel y Functional.
 
 ### Ejecutar Unit Tests
 
@@ -291,12 +291,44 @@ Los Unit tests validan:
 - Validación de fechas para notificaciones programadas
 - Validación de longitud de títulos
 
-### Kernel y Functional Tests
+### Kernel Tests
 
-Los Kernel tests y Functional tests requieren una instalación completa de Drupal
-con base de datos configurada. Consulta la
+Los Kernel tests validan operaciones de base de datos:
+
+```bash
+cd web/core
+php ../../vendor/bin/phpunit --group admin_notifications --testsuite kernel
+```
+
+Funcionalidad probada:
+- Creación de notificaciones en base de datos
+- Consulta de notificaciones activas
+- Marcado de notificaciones como leídas
+- Eliminación de notificaciones
+- Filtrado de banners por fecha
+
+### Functional Tests
+
+Los Functional tests validan la interfaz de usuario completa:
+
+```bash
+cd web/core
+php ../../vendor/bin/phpunit --group admin_notifications --testsuite functional
+```
+
+Funcionalidad probada:
+- Creación de notificaciones a través del formulario web
+- Listado y gestión de notificaciones (editar, eliminar)
+- Endpoint de polling en tiempo real
+- Formulario de configuración
+- Control de acceso y permisos
+- Validación de formularios
+
+**Nota:** Los tests Kernel y Functional requieren una instalación completa de Drupal
+con base de datos configurada y las dependencias de testing instaladas (Mink, Symfony
+PHPUnit Bridge, etc.). Consulta la
 [documentación de PHPUnit de Drupal](https://www.drupal.org/docs/automated-testing/phpunit-in-drupal)
-para más información sobre cómo ejecutar estos tests.
+para más información.
 
 
 ## Traducciones
