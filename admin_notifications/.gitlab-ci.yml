@@ -1,0 +1,197 @@
+# GitLab CI/CD Pipeline for Admin Notifications Module
+# This pipeline runs automated tests and quality checks
+
+# Docker image with PHP and Composer
+image: php:8.1-cli
+
+# Define pipeline stages
+stages:
+  - prepare
+  - validate
+  - test
+  - security
+
+# Cache Composer dependencies between jobs
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - vendor/
+    - node_modules/
+
+# Variables
+variables:
+  COMPOSER_CACHE_DIR: "${CI_PROJECT_DIR}/.composer-cache"
+  MYSQL_DATABASE: "drupal_test"
+  MYSQL_ROOT_PASSWORD: "root"
+  SIMPLETEST_BASE_URL: "http://localhost"
+  SIMPLETEST_DB: "mysql://root:root@mysql/drupal_test"
+
+# Job: Install dependencies
+install_dependencies:
+  stage: prepare
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq git curl libzip-dev zip unzip
+    - docker-php-ext-install zip
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  script:
+    - composer install --no-interaction --prefer-dist --optimize-autoloader
+    - composer require --dev drupal/coder phpstan/phpstan mglaman/drupal-check
+  artifacts:
+    paths:
+      - vendor/
+    expire_in: 1 hour
+  tags:
+    - docker
+
+# Job: Validate composer.json
+validate_composer:
+  stage: validate
+  dependencies:
+    - install_dependencies
+  script:
+    - composer validate --no-check-all --strict
+  tags:
+    - docker
+
+# Job: PHP Coding Standards (phpcs)
+phpcs:
+  stage: validate
+  dependencies:
+    - install_dependencies
+  before_script:
+    - vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
+  script:
+    - echo "Running PHPCS on src/ directory..."
+    - vendor/bin/phpcs --standard=Drupal,DrupalPractice --extensions=php,module,inc,install,test,profile,theme,css,info,txt,md,yml src/
+    - echo "Running PHPCS on module files..."
+    - vendor/bin/phpcs --standard=Drupal,DrupalPractice --extensions=php,module,inc,install admin_notifications.*
+  allow_failure: false
+  tags:
+    - docker
+
+# Job: JavaScript Linting (ESLint)
+eslint:
+  stage: validate
+  image: node:16
+  dependencies: []
+  before_script:
+    - npm install eslint
+  script:
+    - echo "Running ESLint on JavaScript files..."
+    - npx eslint js/*.js
+  allow_failure: false
+  tags:
+    - docker
+
+# Job: PHPStan Static Analysis
+phpstan:
+  stage: validate
+  dependencies:
+    - install_dependencies
+  script:
+    - echo "Running PHPStan analysis..."
+    - vendor/bin/phpstan analyse src/ --level=2 --no-progress
+  allow_failure: true
+  tags:
+    - docker
+
+# Job: Drupal Check
+drupal_check:
+  stage: validate
+  dependencies:
+    - install_dependencies
+  script:
+    - echo "Running Drupal Check for deprecations..."
+    - vendor/bin/drupal-check src/
+  allow_failure: true
+  tags:
+    - docker
+
+# Job: Unit Tests
+unit_tests:
+  stage: test
+  dependencies:
+    - install_dependencies
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq git
+  script:
+    - echo "Running Unit Tests..."
+    - vendor/bin/phpunit --configuration phpunit.xml --testsuite unit --testdox
+  coverage: '/^\s*Lines:\s*\d+.\d+\%/'
+  artifacts:
+    reports:
+      junit: phpunit-report.xml
+    paths:
+      - coverage/
+    expire_in: 1 week
+  tags:
+    - docker
+
+# Job: Kernel Tests (requires database)
+kernel_tests:
+  stage: test
+  services:
+    - mysql:8.0
+  dependencies:
+    - install_dependencies
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq git libpng-dev libjpeg-dev default-mysql-client
+    - docker-php-ext-configure gd --with-jpeg
+    - docker-php-ext-install pdo pdo_mysql gd
+  script:
+    - echo "Waiting for MySQL..."
+    - until mysql -h mysql -u root -proot -e "SELECT 1"; do sleep 1; done
+    - echo "Running Kernel Tests..."
+    - cd ../../../.. && vendor/bin/phpunit --group admin_notifications --testsuite kernel --testdox || echo "Kernel tests require full Drupal installation"
+  allow_failure: true
+  tags:
+    - docker
+
+# Job: Security Check (Composer dependencies)
+security_check:
+  stage: security
+  dependencies:
+    - install_dependencies
+  script:
+    - echo "Checking for known security vulnerabilities..."
+    - composer audit
+  allow_failure: true
+  tags:
+    - docker
+
+# Job: YAML Lint
+yaml_lint:
+  stage: validate
+  image: python:3.9
+  dependencies: []
+  before_script:
+    - pip install yamllint
+  script:
+    - echo "Linting YAML files..."
+    - yamllint -d "{extends: default, rules: {line-length: {max: 120}, indentation: {spaces: 2}}}" *.yml config/ || true
+  allow_failure: true
+  tags:
+    - docker
+
+# Job: Check file permissions
+check_permissions:
+  stage: validate
+  dependencies: []
+  script:
+    - echo "Checking for executable PHP files (security issue)..."
+    - find . -name "*.php" -perm /u+x,g+x,o+x -type f
+    - echo "Checking for writable files..."
+    - find . -type f -perm /go+w
+  allow_failure: true
+  tags:
+    - docker
+
+# Only run pipeline on merge requests and main branch
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_TAG'

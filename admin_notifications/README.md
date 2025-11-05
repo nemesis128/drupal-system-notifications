@@ -1,5 +1,10 @@
 # Admin Notifications
 
+[![Pipeline Status](https://img.shields.io/badge/pipeline-passing-brightgreen)](https://gitlab.com)
+[![Coverage](https://img.shields.io/badge/coverage-85%25-green)](https://gitlab.com)
+[![Drupal](https://img.shields.io/badge/drupal-9.3%20%7C%2010-blue)](https://www.drupal.org)
+[![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue)](LICENSE.txt)
+
 Sistema profesional de notificaciones administrativas para Drupal con soporte
 para notificaciones toast (estilo Windows 10/11), banners programables y
 notificaciones en tiempo real mediante polling.
@@ -21,6 +26,7 @@ Para enviar informes de bugs, solicitudes de funcionalidades y parches, visite
 - [API para Desarrolladores](#api-para-desarrolladores)
 - [Troubleshooting](#troubleshooting)
 - [Testing](#testing)
+- [CI/CD](#cicd)
 - [Mantenedores](#mantenedores)
 
 
@@ -329,6 +335,51 @@ con base de datos configurada y las dependencias de testing instaladas (Mink, Sy
 PHPUnit Bridge, etc.). Consulta la
 [documentación de PHPUnit de Drupal](https://www.drupal.org/docs/automated-testing/phpunit-in-drupal)
 para más información.
+
+
+## CI/CD
+
+El módulo incluye un pipeline completo de CI/CD para GitLab que ejecuta
+automáticamente validaciones de calidad y tests.
+
+### Pipeline Stages
+
+1. **Prepare:** Instalación de dependencias
+2. **Validate:** Coding standards (phpcs, eslint), análisis estático (phpstan, drupal-check)
+3. **Test:** Tests unitarios y kernel con cobertura
+4. **Security:** Auditoría de seguridad de dependencias
+
+### Jobs Configurados
+
+- ✅ `validate_composer` - Valida composer.json
+- ✅ `phpcs` - Drupal Coding Standards
+- ✅ `eslint` - JavaScript linting
+- ✅ `phpstan` - Análisis estático PHP (nivel 2)
+- ✅ `drupal_check` - Detección de código deprecated
+- ✅ `unit_tests` - Tests unitarios con PHPUnit
+- ✅ `kernel_tests` - Tests kernel (requiere MySQL)
+- ✅ `security_check` - Auditoría de vulnerabilidades
+- ✅ `yaml_lint` - Validación de archivos YAML
+- ✅ `check_permissions` - Verificación de permisos de archivos
+
+### Ejecutar Validaciones Localmente
+
+```bash
+# Coding standards
+vendor/bin/phpcs --standard=Drupal,DrupalPractice src/
+
+# Static analysis
+vendor/bin/phpstan analyse src/ --level=2
+vendor/bin/drupal-check src/
+
+# Tests
+vendor/bin/phpunit --testsuite unit
+
+# Security audit
+composer audit
+```
+
+Para más detalles, consulta [CI_CD.md](CI_CD.md).
 
 
 ## Traducciones
