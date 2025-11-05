@@ -1,0 +1,25 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "globals": {
+    "Drupal": "readonly",
+    "drupalSettings": "readonly",
+    "jQuery": "readonly",
+    "$": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2015,
+    "sourceType": "script"
+  },
+  "rules": {
+    "semi": ["error", "always"],
+    "quotes": ["error", "single"],
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-console": "warn",
+    "max-len": ["warn", { "code": 120, "ignoreStrings": true, "ignoreComments": true }],
+    "strict": ["error", "function"]
+  }
+}

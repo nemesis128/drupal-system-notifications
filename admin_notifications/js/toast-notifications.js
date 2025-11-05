@@ -203,8 +203,7 @@
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.5);
       } catch (e) {
-        // Silenciar errores si Web Audio API no está disponible
-        console.log('Web Audio API no disponible');
+        // Silenciar errores si Web Audio API no está disponible.
       }
     },
 
@@ -217,7 +216,7 @@
         '<': '&lt;',
         '>': '&gt;',
         '"': '&quot;',
-        "'": '&#039;'
+        '\'': '&#039;'
       };
       return text.replace(/[&<>"']/g, function (m) {
         return map[m];

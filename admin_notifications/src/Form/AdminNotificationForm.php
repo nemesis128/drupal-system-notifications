@@ -2,9 +2,15 @@
 
 namespace Drupal\admin_notifications\Form;
 
+use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Database\Connection;
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Database\Connection;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\State\StateInterface;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -20,13 +26,53 @@ class AdminNotificationForm extends FormBase {
   protected $database;
 
   /**
+   * The current user service.
+   *
+   * @var \Drupal\Core\Session\AccountProxyInterface
+   */
+  protected $currentUserService;
+
+  /**
+   * The time service.
+   *
+   * @var \Drupal\Component\Datetime\TimeInterface
+   */
+  protected $time;
+
+  /**
+   * The logger factory.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  protected $loggerFactory;
+
+  /**
+   * The state service.
+   *
+   * @var \Drupal\Core\State\StateInterface
+   */
+  protected $state;
+
+  /**
    * Constructs a new AdminNotificationForm.
    *
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
+   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
+   *   The current user service.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
+   *   The logger factory.
+   * @param \Drupal\Core\State\StateInterface $state
+   *   The state service.
    */
-  public function __construct(Connection $database) {
+  public function __construct(Connection $database, AccountProxyInterface $current_user, TimeInterface $time, LoggerChannelFactoryInterface $logger_factory, StateInterface $state) {
     $this->database = $database;
+    $this->currentUserService = $current_user;
+    $this->time = $time;
+    $this->loggerFactory = $logger_factory;
+    $this->state = $state;
   }
 
   /**
@@ -34,7 +80,11 @@ class AdminNotificationForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('database')
+      $container->get('database'),
+      $container->get('current_user'),
+      $container->get('datetime.time'),
+      $container->get('logger.factory'),
+      $container->get('state')
     );
   }
 
@@ -51,7 +101,7 @@ class AdminNotificationForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state, $notification_id = NULL) {
     $notification = NULL;
 
-    // Si estamos editando, cargar la notificación
+    // Si estamos editando, cargar la notificación.
     if ($notification_id) {
       $notification = $this->database->select('admin_notifications', 'an')
         ->fields('an')
@@ -118,16 +168,16 @@ class AdminNotificationForm extends FormBase {
       '#description' => $this->t('<strong>ℹ️ Información sobre zonas horarias:</strong> Las fechas y horas que configure se guardan en tiempo universal (UTC). Esto garantiza que todos los usuarios vean la notificación al mismo instante de tiempo real, independientemente de su ubicación geográfica.'),
     ];
 
-    // Obtener zona horaria del usuario actual
-    $user_timezone = \Drupal::currentUser()->getTimeZone();
+    // Obtener zona horaria del usuario actual.
+    $user_timezone = $this->currentUserService->getTimeZone();
 
     $form['scheduling']['start_date'] = [
       '#type' => 'datetime',
       '#title' => $this->t('Fecha de inicio'),
       '#required' => TRUE,
       '#default_value' => $notification && $notification->start_date
-        ? \Drupal\Core\Datetime\DrupalDateTime::createFromTimestamp($notification->start_date, $user_timezone)
-        : new \Drupal\Core\Datetime\DrupalDateTime('now', $user_timezone),
+        ? DrupalDateTime::createFromTimestamp($notification->start_date, $user_timezone)
+        : new DrupalDateTime('now', $user_timezone),
       '#description' => $this->t('Fecha y hora en que la notificación se activará. <strong>Su zona horaria: @timezone</strong><br><em>La notificación se mostrará a TODOS los usuarios al mismo instante de tiempo real, sin importar en qué zona horaria se encuentren. Por ejemplo: si programa para las 4:00 PM, un usuario en EST la verá a las 4:00 PM de su reloj, mientras que un usuario en CST la verá a las 2:00 PM de su reloj (mismo momento, diferente hora local).</em>', [
         '@timezone' => $user_timezone,
       ]),
@@ -142,7 +192,7 @@ class AdminNotificationForm extends FormBase {
       '#type' => 'datetime',
       '#title' => $this->t('Fecha de fin (opcional)'),
       '#default_value' => $notification && $notification->end_date
-        ? \Drupal\Core\Datetime\DrupalDateTime::createFromTimestamp($notification->end_date, $user_timezone)
+        ? DrupalDateTime::createFromTimestamp($notification->end_date, $user_timezone)
         : NULL,
       '#description' => $this->t('Fecha y hora en que la notificación dejará de mostrarse. Dejar vacío para que no expire. <strong>Su zona horaria: @timezone</strong><br><em>Al igual que la fecha de inicio, esta hora se aplicará como instante absoluto para todos los usuarios.</em>', [
         '@timezone' => $user_timezone,
@@ -180,7 +230,7 @@ class AdminNotificationForm extends FormBase {
     $form['actions']['cancel'] = [
       '#type' => 'link',
       '#title' => $this->t('Cancelar'),
-      '#url' => \Drupal\Core\Url::fromRoute('admin_notifications.list'),
+      '#url' => Url::fromRoute('admin_notifications.list'),
       '#attributes' => ['class' => ['button']],
     ];
 
@@ -193,12 +243,12 @@ class AdminNotificationForm extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
 
-    // Validar fechas solo para notificaciones banner
+    // Validar fechas solo para notificaciones banner.
     if ($form_state->getValue('type') === 'banner') {
       $start_date = $form_state->getValue('start_date');
       $end_date = $form_state->getValue('end_date');
 
-      // Verificar que las fechas sean objetos DrupalDateTime válidos
+      // Verificar que las fechas sean objetos DrupalDateTime válidos.
       if ($end_date && $start_date &&
           is_object($start_date) && method_exists($start_date, 'getTimestamp') &&
           is_object($end_date) && method_exists($end_date, 'getTimestamp')) {
@@ -217,24 +267,26 @@ class AdminNotificationForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $current_user = $this->currentUser();
-    $current_time = \Drupal::time()->getRequestTime();
+    $current_time = $this->time->getRequestTime();
 
     $start_date = $form_state->getValue('start_date');
     $end_date = $form_state->getValue('end_date');
 
-    // Debug: Log para verificar qué está llegando
-    \Drupal::logger('admin_notifications')->info('Start date value: @start, End date value: @end, End date type: @type', [
-      '@start' => print_r($start_date, TRUE),
-      '@end' => print_r($end_date, TRUE),
-      '@type' => gettype($end_date),
-    ]);
+    // Debug: Log para verificar qué está llegando.
+    $this->loggerFactory->get('admin_notifications')
+      ->info('Start date value: @start, End date value: @end, End date type: @type', [
+        '@start' => print_r($start_date, TRUE),
+        '@end' => print_r($end_date, TRUE),
+        '@type' => gettype($end_date),
+      ]);
 
-    // Procesar fechas
+    // Procesar fechas.
     $start_timestamp = $current_time;
     if ($form_state->getValue('type') === 'banner' && $start_date && is_object($start_date)) {
       if (method_exists($start_date, 'getTimestamp')) {
         $start_timestamp = $start_date->getTimestamp();
-      } elseif (method_exists($start_date, 'format')) {
+      }
+      elseif (method_exists($start_date, 'format')) {
         $start_timestamp = (int) $start_date->format('U');
       }
     }
@@ -244,10 +296,12 @@ class AdminNotificationForm extends FormBase {
       // DrupalDateTime puede usar getTimestamp() o format('U')
       if (method_exists($end_date, 'getTimestamp')) {
         $end_timestamp = $end_date->getTimestamp();
-      } elseif (method_exists($end_date, 'format')) {
+      }
+      elseif (method_exists($end_date, 'format')) {
         $end_timestamp = (int) $end_date->format('U');
       }
-      \Drupal::logger('admin_notifications')->info('End timestamp calculated: @ts', ['@ts' => $end_timestamp]);
+      $this->loggerFactory->get('admin_notifications')
+        ->info('End timestamp calculated: @ts', ['@ts' => $end_timestamp]);
     }
 
     $notification_data = [
@@ -264,7 +318,7 @@ class AdminNotificationForm extends FormBase {
     $notification_id = $form_state->get('notification_id');
 
     if ($notification_id) {
-      // Actualizar notificación existente
+      // Actualizar notificación existente.
       $this->database->update('admin_notifications')
         ->fields($notification_data)
         ->condition('id', $notification_id)
@@ -273,7 +327,7 @@ class AdminNotificationForm extends FormBase {
       $this->messenger()->addStatus($this->t('La notificación ha sido actualizada.'));
     }
     else {
-      // Crear nueva notificación
+      // Crear nueva notificación.
       $notification_data['created'] = $current_time;
       $notification_data['created_by'] = $current_user->id();
 
@@ -283,9 +337,9 @@ class AdminNotificationForm extends FormBase {
 
       $this->messenger()->addStatus($this->t('La notificación ha sido creada.'));
 
-      // Si es notificación en tiempo real y está activa, crear un estado para polling
+      // Si es notificación en tiempo real y está activa, crear un estado para polling.
       if ($notification_data['type'] === 'realtime' && $notification_data['status'] === 'active') {
-        \Drupal::state()->set('admin_notifications.new_notification', [
+        $this->state->set('admin_notifications.new_notification', [
           'id' => $notification_id,
           'timestamp' => $current_time,
         ]);

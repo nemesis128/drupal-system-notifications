@@ -3,7 +3,7 @@
  * Script principal para el sistema de polling de notificaciones.
  */
 
-(function ($, Drupal, drupalSettings) {
+(function ($, Drupal) {
   'use strict';
 
   Drupal.behaviors.adminNotifications = {
@@ -88,8 +88,8 @@
             self.lastCheck = response.timestamp;
           }
         },
-        error: function (xhr, status, error) {
-          console.error('Admin Notifications: Error polling notifications:', error);
+        error: function (_xhr, _status, _error) {
+          // Error en polling - se registra en el servidor.
         }
       });
     },
@@ -121,9 +121,8 @@
             });
           }
         },
-        error: function (xhr, status, error) {
-          console.error('Error dismissing notification:', error);
-          // Aún así remover visualmente
+        error: function (_xhr, _status, _error) {
+          // Error al marcar como leída - remover visualmente de todos modos.
           $banner.slideUp(300, function () {
             $(this).remove();
           });
@@ -141,4 +140,4 @@
     }
   };
 
-})(jQuery, Drupal, drupalSettings);
+})(jQuery, Drupal);

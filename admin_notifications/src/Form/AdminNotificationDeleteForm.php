@@ -66,7 +66,7 @@ class AdminNotificationDeleteForm extends ConfirmFormBase {
   public function buildForm(array $form, FormStateInterface $form_state, $notification_id = NULL) {
     $this->notificationId = $notification_id;
 
-    // Cargar la notificación
+    // Cargar la notificación.
     $this->notification = $this->database->select('admin_notifications', 'an')
       ->fields('an')
       ->condition('id', $notification_id)
@@ -115,12 +115,12 @@ class AdminNotificationDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Eliminar registros de lectura
+    // Eliminar registros de lectura.
     $this->database->delete('admin_notifications_read')
       ->condition('notification_id', $this->notificationId)
       ->execute();
 
-    // Eliminar la notificación
+    // Eliminar la notificación.
     $this->database->delete('admin_notifications')
       ->condition('id', $this->notificationId)
       ->execute();

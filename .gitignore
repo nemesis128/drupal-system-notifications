@@ -4,6 +4,21 @@
 *.md
 *.txt
 !README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!API.md
+!SECURITY.md
+!LOGGING.md
+!DRUPAL_ORG_REQUIREMENTS.md
+!IMPLEMENTATION_PLAN.md
+!EXAMPLES.md
+
+# Node modules y dependencias
+node_modules/
+package-lock.json
+
+# Vendor y dependencias PHP
+vendor/
 
 # Archivos temporales
 *.swp
@@ -15,3 +30,10 @@
 .idea/
 .vscode/
 *.sublime-*
+
+# Archivos de coverage y tests
+coverage/
+.phpunit.result.cache
+
+# Logs
+*.log

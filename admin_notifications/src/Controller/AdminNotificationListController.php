@@ -4,6 +4,8 @@ namespace Drupal\admin_notifications\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -20,13 +22,33 @@ class AdminNotificationListController extends ControllerBase {
   protected $database;
 
   /**
+   * The date formatter service.
+   *
+   * @var \Drupal\Core\Datetime\DateFormatterInterface
+   */
+  protected $dateFormatter;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * Constructs a new AdminNotificationListController.
    *
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
+   *   The date formatter service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    */
-  public function __construct(Connection $database) {
+  public function __construct(Connection $database, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager) {
     $this->database = $database;
+    $this->dateFormatter = $date_formatter;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -34,7 +56,9 @@ class AdminNotificationListController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('database')
+      $container->get('database'),
+      $container->get('date.formatter'),
+      $container->get('entity_type.manager')
     );
   }
 
@@ -44,7 +68,7 @@ class AdminNotificationListController extends ControllerBase {
   public function list() {
     $build = [];
 
-    // Botón para crear nueva notificación
+    // Botón para crear nueva notificación.
     $build['create'] = [
       '#type' => 'link',
       '#title' => $this->t('Crear Nueva Notificación'),
@@ -56,7 +80,7 @@ class AdminNotificationListController extends ControllerBase {
       '#suffix' => '</div>',
     ];
 
-    // Obtener todas las notificaciones
+    // Obtener todas las notificaciones.
     $query = $this->database->select('admin_notifications', 'an')
       ->fields('an')
       ->orderBy('created', 'DESC');
@@ -72,7 +96,7 @@ class AdminNotificationListController extends ControllerBase {
       return $build;
     }
 
-    // Crear tabla
+    // Crear tabla.
     $header = [
       $this->t('ID'),
       $this->t('Título'),
@@ -105,7 +129,9 @@ class AdminNotificationListController extends ControllerBase {
         'completed' => $this->t('Completada'),
       ];
 
-      $user = \Drupal\user\Entity\User::load($notification->created_by);
+      $user = $this->entityTypeManager
+        ->getStorage('user')
+        ->load($notification->created_by);
       $username = $user ? $user->getDisplayName() : $this->t('Desconocido');
 
       $operations = [
@@ -123,9 +149,9 @@ class AdminNotificationListController extends ControllerBase {
         ],
       ];
 
-      // Formatear fecha de expiración
+      // Formatear fecha de expiración.
       $end_date_formatted = $notification->end_date
-        ? \Drupal::service('date.formatter')->format($notification->end_date, 'short')
+        ? $this->dateFormatter->format($notification->end_date, 'short')
         : $this->t('Sin límite');
 
       $rows[] = [
@@ -134,7 +160,7 @@ class AdminNotificationListController extends ControllerBase {
         $type_labels[$notification->type] ?? $notification->type,
         $severity_labels[$notification->severity] ?? $notification->severity,
         $status_labels[$notification->status] ?? $notification->status,
-        \Drupal::service('date.formatter')->format($notification->start_date, 'short'),
+        $this->dateFormatter->format($notification->start_date, 'short'),
         $end_date_formatted,
         $username,
         ['data' => $operations],

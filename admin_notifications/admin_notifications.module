@@ -32,15 +32,15 @@ function admin_notifications_help($route_name, RouteMatchInterface $route_match)
 function admin_notifications_page_attachments(array &$attachments) {
   $user = \Drupal::currentUser();
 
-  // Solo cargar las librerías para usuarios con permisos
+  // Solo cargar las librerías para usuarios con permisos.
   if ($user->hasPermission('view admin notifications') ||
       $user->hasPermission('access administration pages')) {
 
-    // Adjuntar librerías JavaScript y CSS
+    // Adjuntar librerías JavaScript y CSS.
     $attachments['#attached']['library'][] = 'admin_notifications/notifications';
     $attachments['#attached']['library'][] = 'admin_notifications/toast';
 
-    // Configuración para JavaScript
+    // Configuración para JavaScript.
     $config = \Drupal::config('admin_notifications.settings');
     $attachments['#attached']['drupalSettings']['adminNotifications'] = [
       'pollInterval' => $config->get('poll_interval') ?? 30000,
@@ -72,7 +72,7 @@ function admin_notifications_cron() {
       ]);
     }
 
-    // Limpiar notificaciones expiradas
+    // Limpiar notificaciones expiradas.
     $deleted_notifications = $database->delete('admin_notifications')
       ->condition('status', 'active')
       ->condition('end_date', REQUEST_TIME, '<')
@@ -115,13 +115,13 @@ function admin_notifications_theme($existing, $type, $theme, $path) {
 function admin_notifications_page_top(array &$page_top) {
   $user = \Drupal::currentUser();
 
-  // Solo mostrar banners a usuarios con permisos
+  // Solo mostrar banners a usuarios con permisos.
   if (!$user->hasPermission('view admin notifications') &&
       !$user->hasPermission('access administration pages')) {
     return;
   }
 
-  // Obtener notificaciones banner activas
+  // Obtener notificaciones banner activas.
   $database = \Drupal::database();
   $current_time = REQUEST_TIME;
 
@@ -131,7 +131,7 @@ function admin_notifications_page_top(array &$page_top) {
     ->condition('an.status', 'active')
     ->condition('an.start_date', $current_time, '<=');
 
-  // Filtrar por fecha de fin si existe
+  // Filtrar por fecha de fin si existe.
   $or_group = $query->orConditionGroup()
     ->condition('an.end_date', $current_time, '>=')
     ->isNull('an.end_date');
@@ -139,7 +139,7 @@ function admin_notifications_page_top(array &$page_top) {
 
   $notifications = $query->execute()->fetchAll();
 
-  // Verificar cuáles no han sido leídas por el usuario
+  // Verificar cuáles no han sido leídas por el usuario.
   foreach ($notifications as $notification) {
     $read = $database->select('admin_notifications_read', 'anr')
       ->condition('notification_id', $notification->id)

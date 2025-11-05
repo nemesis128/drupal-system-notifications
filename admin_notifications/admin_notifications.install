@@ -136,6 +136,6 @@ function admin_notifications_install() {
  * Implements hook_uninstall().
  */
 function admin_notifications_uninstall() {
-  // Limpiar configuración
+  // Limpiar configuración.
   \Drupal::configFactory()->getEditable('admin_notifications.settings')->delete();
 }
