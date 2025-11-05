@@ -1,0 +1,29 @@
+{
+  "name": "drupal/admin_notifications",
+  "description": "Sistema profesional de notificaciones administrativas para Drupal con soporte para toast, banners y notificaciones en tiempo real.",
+  "type": "drupal-module",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://www.drupal.org/project/admin_notifications",
+  "authors": [
+    {
+      "name": "Admin Notifications Team",
+      "role": "Maintainer"
+    }
+  ],
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/admin_notifications",
+    "source": "https://git.drupalcode.org/project/admin_notifications"
+  },
+  "require": {
+    "php": ">=7.4",
+    "drupal/core": "^9.3 || ^10"
+  },
+  "require-dev": {
+    "drupal/coder": "^8.3",
+    "mglaman/drupal-check": "^1.4",
+    "phpstan/phpstan": "^1.10",
+    "mglaman/phpstan-drupal": "^1.2"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

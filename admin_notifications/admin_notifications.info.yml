@@ -1,12 +1,17 @@
 name: 'Admin Notifications'
-description: 'Sistema de notificaciones administrativas con alertas banner y notificaciones en tiempo real'
+description: 'Sistema profesional de notificaciones administrativas con soporte para toast, banners y notificaciones en tiempo real.'
 type: module
-core_version_requirement: ^10
-package: 'Custom'
+core_version_requirement: ^9.3 || ^10
+package: Administration
 
+# Información del proyecto
+project: 'admin_notifications'
+version: '8.x-1.0-alpha1'
+
+# Dependencias
 dependencies:
+  - drupal:system (>=9.3)
   - drupal:user
-  - drupal:system
-  - drupal:datetime
 
+# Configuración
 configure: admin_notifications.settings
