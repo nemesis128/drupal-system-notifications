@@ -1,522 +1,323 @@
-# Módulo de Notificaciones Administrativas para Drupal 10
+# Admin Notifications
 
-Sistema completo de notificaciones administrativas para Drupal 10 con soporte para alertas banner y notificaciones en tiempo real estilo Windows.
+Sistema profesional de notificaciones administrativas para Drupal con soporte
+para notificaciones toast (estilo Windows 10/11), banners programables y
+notificaciones en tiempo real mediante polling.
 
-## Características
+Para obtener una descripción completa del módulo, visite la
+[página del proyecto](https://www.drupal.org/project/admin_notifications).
 
-### 📢 Dos tipos de notificaciones
+Para enviar informes de bugs, solicitudes de funcionalidades y parches, visite
+[la cola de issues](https://www.drupal.org/project/issues/admin_notifications).
 
-1. **Notificaciones en Tiempo Real (Toast)**
-   - Aparecen automáticamente en la esquina inferior derecha (configurable)
-   - Estilo Windows 10/11
-   - Se muestran a usuarios conectados con permisos administrativos
-   - Ideal para avisos urgentes de mantenimiento o alertas inmediatas
 
-2. **Notificaciones Banner Programadas**
-   - Similar a las alertas nativas de Drupal
-   - Se muestran en la parte superior del contenido
-   - Pueden programarse con fecha de inicio y fin
-   - Perfectas para avisos con anticipación
+## Tabla de Contenidos
 
-### ✨ Funcionalidades principales
+- [Requisitos](#requisitos)
+- [Instalación](#instalación)
+- [Configuración](#configuración)
+- [Características](#características)
+- [Uso](#uso)
+- [API para Desarrolladores](#api-para-desarrolladores)
+- [Troubleshooting](#troubleshooting)
+- [Mantenedores](#mantenedores)
 
-- **Panel de administración completo** para crear y gestionar notificaciones
-- **Sistema de polling automático** para notificaciones en tiempo real (sin necesidad de WebSocket)
-  - Polling cada 30 segundos (configurable)
-  - Detección automática de nuevas notificaciones sin recargar página
-  - Sistema robusto que sobrevive a recargas de página
-- **Cuatro niveles de severidad**: Info, Success, Warning, Error
-- **Sistema de seguimiento** de notificaciones leídas por usuario
-- **Configuración flexible** de intervalos, duración y posición
-  - Duración de toast configurable (3-60 segundos)
-  - Intervalo de polling configurable (5-300 segundos)
-  - 4 posiciones para toasts (esquinas de la pantalla)
-- **Botón de cerrar** en notificaciones banner
-- **Sonido de notificación** opcional (Web Audio API)
-- **Diseño responsive** y accesible
-- **Limpieza automática** de notificaciones antiguas vía cron
-- **Sistema de logging profesional** con Drupal Watchdog (dblog)
-  - Logging de errores, advertencias y eventos
-  - Accesible vía interfaz web o Drush
-  - Ver `LOGGING.md` para más detalles
-- **🌍 Soporte multiidioma**: Inglés, Español, Francés, Portugués (Brasil), Japonés
-  - Archivos de traducción incluidos
-  - Scripts de importación automática
-  - Ver sección de Traducciones más abajo
 
 ## Requisitos
 
-- Drupal 10.x
-- PHP 8.3+
-- Módulos core: user, system, datetime
+Este módulo requiere:
+
+- Drupal: ^9.3 || ^10
+- PHP: >= 7.4
+
 
 ## Instalación
 
-### 1. Copiar el módulo
+Instalar como lo harías normalmente con cualquier módulo de Drupal. Para más
+información, consulta:
+[Instalando módulos de Drupal](https://www.drupal.org/node/1897420).
 
-Copia la carpeta `admin_notifications` a uno de estos directorios:
-- `modules/custom/admin_notifications` (recomendado)
-- `sites/all/modules/admin_notifications`
+### Usando Composer (Recomendado)
 
-### 2. Habilitar el módulo
-
-**Vía interfaz:**
-1. Ve a `Administrar > Extensiones` (admin/modules)
-2. Busca "Admin Notifications" en la sección "Custom"
-3. Marca la casilla y haz clic en "Instalar"
-
-**Vía Drush:**
 ```bash
-drush en admin_notifications -y
+composer require drupal/admin_notifications
+drush en admin_notifications
 drush cr
 ```
 
-### 3. Configurar permisos
+### Instalación Manual
 
-Ve a `Administrar > Personas > Permisos` (admin/people/permissions) y asigna:
+1. Descargar el módulo desde la página del proyecto
+2. Extraer en `modules/contrib/admin_notifications`
+3. Habilitar en `admin/modules` o con drush:
+   ```bash
+   drush en admin_notifications
+   drush cr
+   ```
 
-- **"Administrar notificaciones del sistema"**: Para usuarios que pueden crear/editar notificaciones
-- **"Ver notificaciones administrativas"**: Para usuarios que deben recibir las notificaciones
-
-**Recomendado:** Asignar ambos permisos al rol de "Administrador"
-
-## Uso
-
-### Crear una notificación
-
-1. Ve a `Administrar > Configuración > Sistema > Notificaciones Administrativas`
-   - URL: `/admin/config/system/admin-notifications`
-
-2. Haz clic en "Crear Nueva Notificación"
-
-3. Completa el formulario:
-   - **Título**: Título corto y descriptivo
-   - **Mensaje**: Contenido completo de la notificación
-   - **Tipo de notificación**:
-     - **Tiempo Real (Toast)**: Se muestra inmediatamente al guardar
-     - **Banner**: Se muestra según la programación
-   - **Severidad**: Info, Success, Warning o Error
-   - **Programación** (solo para Banner):
-     - Fecha de inicio
-     - Fecha de fin (opcional)
-   - **Estado**:
-     - **Borrador**: No se muestra
-     - **Activa**: Se muestra a los usuarios
-     - **Completada**: Archivada
-
-4. Guarda la notificación
-
-### Ejemplos de uso
-
-#### Aviso de mantenimiento inmediato
-
-```
-Tipo: Tiempo Real (Toast)
-Severidad: Warning
-Título: Mantenimiento programado
-Mensaje: El sistema entrará en mantenimiento en 15 minutos. Por favor, guarda tu trabajo.
-Estado: Activa
-```
-
-#### Aviso de nueva funcionalidad
-
-```
-Tipo: Banner
-Severidad: Success
-Título: Nueva funcionalidad disponible
-Mensaje: Ya está disponible el nuevo módulo de reportes avanzados en el menú principal.
-Fecha inicio: 2025-01-15 09:00
-Fecha fin: 2025-01-22 17:00
-Estado: Activa
-```
-
-#### Alerta de error crítico
-
-```
-Tipo: Tiempo Real (Toast)
-Severidad: Error
-Título: Error en el sistema de archivos
-Mensaje: Se detectó un problema con el almacenamiento. Contacta al equipo técnico.
-Estado: Activa
-```
 
 ## Configuración
 
-### Ajustes del sistema
+1. Navegar a **Configuración > Sistema > Admin Notifications**
+   (`admin/config/system/admin-notifications`)
 
-Ve a `Administrar > Configuración > Sistema > Notificaciones Administrativas > Configuración`
-- URL: `/admin/config/system/admin-notifications/settings`
+2. Configurar opciones disponibles:
+   - **Intervalo de Polling:** Frecuencia de verificación (milisegundos)
+   - **Duración de Toast:** Tiempo de visualización (milisegundos)
+   - **Posición de Toast:** Ubicación en pantalla
+   - **Sonido:** Activar/desactivar notificación sonora
 
-**Opciones disponibles:**
+3. Configurar permisos en **Personas > Permisos**:
+   - `administer admin notifications` - Gestionar notificaciones
+   - `view admin notifications` - Ver notificaciones
 
-- **Intervalo de polling** (5000-300000 ms)
-  - Por defecto: 30000 ms (30 segundos)
-  - Frecuencia de verificación de nuevas notificaciones en tiempo real
+4. Crear notificaciones en **Administración > Notificaciones**
+   (`admin/reports/admin-notifications`)
 
-- **Duración del toast** (3000-60000 ms)
-  - Por defecto: 10000 ms (10 segundos)
-  - Tiempo que permanece visible la notificación toast
 
-- **Posición del toast**
-  - Superior izquierda
-  - Superior derecha
-  - Inferior izquierda
-  - **Inferior derecha** (por defecto)
+## Características
 
-- **Habilitar sonido**
-  - Reproduce un tono cuando aparece una notificación en tiempo real
+### Tipos de Notificaciones
 
-## Arquitectura técnica
+#### 1. Toast Notifications (Tiempo Real)
+Notificaciones estilo Windows 10/11 que aparecen automáticamente:
+- Verificación automática cada 30 segundos (configurable)
+- Posiciones personalizables (4 esquinas)
+- Sonido opcional
+- Auto-cierre configurable
+- 4 niveles de severidad (info, success, warning, error)
 
-### Sistema de polling
+#### 2. Banner Notifications (Programadas)
+Banners persistentes con programación por fecha:
+- Fecha de inicio y fin
+- Visible en páginas específicas o globalmente
+- Botón de cerrar/ocultar
+- Estilos según severidad
+- Responsive
 
-El módulo utiliza un sistema de polling (en lugar de WebSocket) para verificar nuevas notificaciones:
+### Capacidades
 
-1. JavaScript hace peticiones AJAX al endpoint `/admin-notifications/poll` cada X segundos
-2. El servidor devuelve notificaciones nuevas desde el último check
-3. Las notificaciones se muestran automáticamente como toast
-4. Se marcan como leídas automáticamente
+- **Sistema de Polling:** Verificación automática en tiempo real
+- **Multiusuario:** Notificaciones por usuario, rol o globales
+- **Estado de Lectura:** Seguimiento de leídas/no leídas
+- **Gestión Completa:** CRUD de notificaciones vía UI
+- **Multiidioma:** Soporte para 5 idiomas
+- **Accesibilidad:** WCAG 2.1 compatible
+- **Logging:** Integración con Drupal Watchdog
 
-**Ventajas:**
-- No requiere infraestructura adicional (WebSocket, Mercure, etc.)
-- Funciona en cualquier servidor web estándar
-- Fácil de configurar y mantener
 
-### Base de datos
+## Uso
 
-El módulo crea dos tablas:
+### Para Administradores
 
-**`admin_notifications`**
-- Almacena todas las notificaciones
-- Campos: id, title, message, type, severity, status, start_date, end_date, created, created_by, updated
+#### Crear Notificación Toast (Tiempo Real)
+1. Ir a `admin/reports/admin-notifications`
+2. Clic en "Agregar notificación"
+3. Seleccionar tipo: **Tiempo Real**
+4. Completar título y mensaje
+5. Elegir severidad (info, success, warning, error)
+6. Guardar
 
-**`admin_notifications_read`**
-- Rastrea qué usuarios han leído qué notificaciones
-- Campos: id, notification_id, uid, read_timestamp
+La notificación aparecerá automáticamente a usuarios con permisos en su
+próximo ciclo de polling.
 
-### Limpieza automática (Cron)
+#### Crear Notificación Banner (Programada)
+1. Ir a `admin/reports/admin-notifications`
+2. Clic en "Agregar notificación"
+3. Seleccionar tipo: **Programada**
+4. Completar título y mensaje
+5. Configurar fecha inicio/fin
+6. Elegir severidad
+7. Guardar
 
-El hook `hook_cron()` ejecuta automáticamente:
-- Elimina registros de lectura mayores a 30 días
-- Elimina notificaciones expiradas (con end_date pasado)
+El banner aparecerá entre las fechas configuradas.
 
-## Personalización
+### Para Desarrolladores
 
-### Cambiar estilos CSS
+Ver [API.md](API.md) para documentación completa de la API.
 
-Los estilos se pueden sobrescribir en tu tema:
-
-```css
-/* Cambiar el color de las notificaciones de error */
-.toast-notification--error::before {
-  background-color: #your-color;
-}
-
-/* Cambiar la posición del contenedor */
-.toast-notifications-container--bottom-right {
-  bottom: 20px;
-  right: 20px;
-}
-```
-
-### Modificar el intervalo de polling programáticamente
-
-```php
-$config = \Drupal::configFactory()->getEditable('admin_notifications.settings');
-$config->set('poll_interval', 60000); // 60 segundos
-$config->save();
-```
-
-### Crear notificaciones programáticamente
+#### Crear Notificación Programáticamente
 
 ```php
+// Obtener el servicio
 $database = \Drupal::database();
 
-$notification_id = $database->insert('admin_notifications')
+// Crear notificación toast
+$database->insert('admin_notifications')
   ->fields([
-    'title' => 'Mi notificación',
-    'message' => 'Mensaje de la notificación',
-    'type' => 'realtime', // o 'banner'
-    'severity' => 'warning', // info, success, warning, error
+    'title' => 'Nueva actualización',
+    'message' => 'El sistema ha sido actualizado exitosamente.',
+    'severity' => 'success',
+    'type' => 'realtime',
     'status' => 'active',
-    'start_date' => time(),
-    'end_date' => NULL,
-    'created' => time(),
+    'created' => \Drupal::time()->getRequestTime(),
     'created_by' => \Drupal::currentUser()->id(),
-    'updated' => time(),
   ])
   ->execute();
 
-// Para notificaciones en tiempo real, actualizar el estado
-if ($type === 'realtime') {
-  \Drupal::state()->set('admin_notifications.new_notification', [
-    'id' => $notification_id,
-    'timestamp' => time(),
-  ]);
+// Crear notificación banner programada
+$database->insert('admin_notifications')
+  ->fields([
+    'title' => 'Mantenimiento programado',
+    'message' => 'El sistema estará en mantenimiento mañana de 2-4 AM.',
+    'severity' => 'warning',
+    'type' => 'banner',
+    'status' => 'active',
+    'start_date' => strtotime('tomorrow'),
+    'end_date' => strtotime('+7 days'),
+    'created' => \Drupal::time()->getRequestTime(),
+    'created_by' => \Drupal::currentUser()->id(),
+  ])
+  ->execute();
+```
+
+
+## API para Desarrolladores
+
+### Endpoints REST
+
+#### GET `/admin-notifications/poll`
+Endpoint de polling para obtener nuevas notificaciones.
+
+**Parámetros:**
+- `last_check` (int) - Timestamp del último check
+
+**Respuesta:**
+```json
+{
+  "notifications": [
+    {
+      "id": 123,
+      "title": "Título",
+      "message": "Mensaje",
+      "severity": "info",
+      "created": 1234567890
+    }
+  ],
+  "timestamp": 1234567890,
+  "count": 1
 }
 ```
 
-## Solución de problemas
+#### POST `/admin-notifications/{notification_id}/mark-read`
+Marcar notificación como leída.
 
-### Las notificaciones en tiempo real no aparecen
-
-1. Verifica que el usuario tenga el permiso "Ver notificaciones administrativas"
-2. Abre la consola del navegador (F12) y busca errores JavaScript
-3. Verifica que el intervalo de polling esté configurado correctamente
-4. Asegúrate de que la notificación esté en estado "Activa"
-
-### Los banners no se muestran
-
-1. Verifica que la fecha de inicio sea anterior a la fecha actual
-2. Verifica que la fecha de fin (si existe) sea posterior a la fecha actual
-3. Asegúrate de que el estado sea "Activa"
-4. Limpia la caché de Drupal: `drush cr`
-
-### Problemas de rendimiento
-
-Si tienes muchos usuarios conectados:
-1. Aumenta el intervalo de polling (ej: 60000 ms = 1 minuto)
-2. Considera implementar caché en el endpoint de polling
-3. Limita el número de notificaciones activas simultáneas
-
-## Mejoras futuras
-
-Posibles mejoras que se pueden implementar:
-
-- [ ] Soporte para WebSocket/Mercure (notificaciones verdaderamente push)
-- [ ] Filtrado de notificaciones por roles específicos
-- [ ] Plantillas personalizables desde la UI
-- [ ] Exportación/importación de notificaciones
-- [ ] Estadísticas de visualización
-- [ ] Integración con el sistema de mensajes de Drupal
-- [ ] Soporte para adjuntar archivos o enlaces
-- [ ] Notificaciones recurrentes (diarias, semanales)
-
-## 🌍 Traducciones
-
-El módulo incluye soporte completo para múltiples idiomas. Todas las cadenas de texto están preparadas para traducción usando el sistema de internacionalización de Drupal.
-
-### Idiomas Disponibles
-
-El módulo incluye traducciones para los siguientes idiomas:
-
-- 🇬🇧 **Inglés** (en)
-- 🇪🇸 **Español** (es)
-- 🇫🇷 **Francés** (fr)
-- 🇧🇷 **Portugués (Brasil)** (pt-br)
-- 🇯🇵 **Japonés** (ja)
-
-### Importación Automática de Traducciones
-
-#### Para Windows:
-```bash
-cd modules/custom/admin_notifications/translations
-import-all.bat
+**Respuesta:**
+```json
+{
+  "success": true
+}
 ```
 
-#### Para Linux/Mac:
+Ver [API.md](API.md) para documentación completa.
+
+
+## Troubleshooting
+
+### Las notificaciones toast no aparecen
+
+1. **Verificar permisos:**
+   ```bash
+   drush user:role:add "view admin notifications" authenticated
+   ```
+
+2. **Verificar configuración de polling:**
+   - Ir a `admin/config/system/admin-notifications`
+   - Confirmar que el intervalo de polling está configurado (ej: 30000ms)
+
+3. **Limpiar caché:**
+   ```bash
+   drush cr
+   ```
+
+4. **Revisar logs:**
+   ```bash
+   drush watchdog:show --filter=admin_notifications
+   ```
+
+### Los banners causan scroll horizontal
+
+Actualizar a la última versión que incluye la corrección de ancho:
 ```bash
-cd modules/custom/admin_notifications/translations
-bash import-all.sh
-```
-
-### Importación Manual
-
-**Vía Drush (recomendado):**
-```bash
-# Agregar idioma e importar traducciones
-drush language:add es
-drush locale:import es modules/custom/admin_notifications/translations/es.po --type=customized --override=all -y
-
-# Cambiar idioma predeterminado del sitio
-drush config:set system.site default_langcode es -y
-
-# Limpiar caché
+composer update drupal/admin_notifications
 drush cr
 ```
 
-**Vía interfaz web:**
-1. Ve a `Configuración > Regional e idioma > Idiomas` (`/admin/config/regional/language`)
-2. Haz clic en "Agregar idioma" y selecciona el idioma deseado
-3. Ve a `Traducir interfaz > Importar` (`/admin/config/regional/translate/import`)
-4. Selecciona el idioma
-5. Sube el archivo `.po` correspondiente desde `translations/`
-6. Haz clic en "Importar"
+### Problemas de caché con JavaScript
 
-### Verificación
+1. Deshabilitar agregación durante desarrollo:
+   ```bash
+   drush config:set system.performance js.preprocess 0 -y
+   drush config:set system.performance css.preprocess 0 -y
+   ```
 
-Después de importar las traducciones:
+2. Limpiar archivos agregados:
+   ```bash
+   drush cr
+   rm -rf sites/default/files/js/*
+   rm -rf sites/default/files/css/*
+   ```
 
-1. Cambia el idioma del sitio o del usuario
-2. Ve a `Configuración > Sistema > Admin Notifications`
-3. Todos los textos deberían estar en el idioma seleccionado
+### Ver logs detallados
 
-### Agregar Nuevos Idiomas
-
-Para contribuir con traducciones a otros idiomas:
-
-1. Copia el archivo `translations/en.po`
-2. Renómbralo con el código de idioma ISO (ej: `de.po` para alemán)
-3. Traduce todas las cadenas `msgstr`
-4. Importa el archivo usando los métodos anteriores
-
-Para más detalles, consulta `translations/README.md`
-
-## 🐛 Historial de Bugfixes
-
-Esta sección documenta los problemas resueltos y mejoras implementadas durante el desarrollo.
-
-### Versión 1.3 (Última)
-
-#### 🔧 Bugfix: Sistema de Polling no se Ejecutaba Periódicamente
-
-**Problema:**
-- El sistema de polling solo se ejecutaba una vez al cargar la página
-- Las notificaciones toast NO aparecían automáticamente sin recargar
-- El `setInterval` no se estaba ejecutando cada 30 segundos
-
-**Causa Raíz:**
-- La condición `if (context !== document)` era demasiado estricta
-- Drupal.behaviors puede llamar a `attach()` con diferentes contextos (no siempre `document`)
-- El código retornaba inmediatamente sin inicializar el polling
-
-**Solución:**
-- Eliminada validación estricta de `context !== document`
-- Agregado flag `initialized` para prevenir múltiples inicializaciones
-- Validación solo de `settings.adminNotifications` en lugar del contexto
-- Archivo: `js/admin-notifications.js:15-30`
-
-**Commit:** [Pendiente]
-
----
-
-#### 🔧 Bugfix: Duración de Toast No Respetaba Configuración
-
-**Problema:**
-- La configuración de duración de toast (ej: 30000ms) no se aplicaba
-- Los toasts siempre duraban 10 segundos por defecto
-
-**Causa Raíz:**
-- La función `showToastNotification()` no pasaba el parámetro `duration` a `Drupal.toastNotifications.show()`
-- El backend no estaba pasando `toast_duration` a `drupalSettings`
-
-**Solución:**
-1. **Backend** (`admin_notifications.module:44-52`):
-   - Agregadas todas las configuraciones a `drupalSettings`:
-     - `toast_duration`
-     - `toast_position`
-     - `sound_enabled`
-
-2. **Frontend** (`js/admin-notifications.js:88-98`):
-   - Modificada función para pasar el parámetro `duration` correctamente:
-     ```javascript
-     const duration = Drupal.toastNotifications.toastDuration;
-     Drupal.toastNotifications.show(title, message, severity, duration);
-     ```
-
-**Commit:** [Pendiente]
-
----
-
-#### 🎨 Mejora: Botón Eliminar con Texto Invisible
-
-**Problema:**
-- En algunos temas de Drupal, el botón "Eliminar" en la tabla de notificaciones tenía texto rojo sobre fondo rojo
-- El texto solo se hacía visible al hacer hover
-
-**Solución:**
-- Forzado color blanco del texto con `!important` en estados normal y hover
-- Archivo: `css/admin-notifications.css:37-45`
-
-**Commit:** [Pendiente]
-
----
-
-#### ✨ Mejora: Botón de Cerrar en Banners
-
-**Problema:**
-- Las notificaciones banner no tenían botón de cerrar
-- Los usuarios no podían ocultar banners manualmente
-
-**Solución:**
-- Mejorados estilos CSS del botón de cerrar existente
-- Agregado fondo semitransparente en hover
-- Agregado estado de focus para accesibilidad con teclado
-- Archivo: `css/banner-notifications.css:59-84`
-
-**Commit:** [Pendiente]
-
----
-
-#### 📊 Mejora: Sistema de Logging del Servidor
-
-**Implementación:**
-- Agregado sistema completo de logging con Drupal Watchdog
-- Try-catch en todos los endpoints críticos
-- Logging de errores, advertencias y eventos informativos
-- Documentación en `LOGGING.md`
-
-**Archivos modificados:**
-- `src/Controller/AdminNotificationPollController.php`
-- `admin_notifications.module` (hook_cron)
-
-**Tipos de logs:**
-- 🔴 **Error**: Excepciones en polling, mark-read, cron
-- ⚠️ **Warning**: Accesos denegados, notificaciones no encontradas
-- ℹ️ **Info**: Limpieza exitosa de cron
-
-**Ver logs:**
 ```bash
-drush watchdog:show --type=admin_notifications
+# Ver todos los logs del módulo
+drush watchdog:show --filter=admin_notifications
+
+# Ver solo errores
+drush watchdog:show --severity=Error --filter=admin_notifications
+
+# Ver en tiempo real
+drush watchdog:tail --filter=admin_notifications
 ```
 
-**Commit:** [Pendiente]
 
----
+## Traducciones
 
-#### 🌍 Mejora: Soporte Multiidioma
+El módulo incluye soporte para 5 idiomas:
+- Español (es)
+- Inglés (en)
+- Francés (fr)
+- Portugués Brasil (pt-br)
+- Japonés (ja)
 
-**Implementación:**
-- Agregadas traducciones completas para 5 idiomas
-- Scripts de importación automática (Windows y Linux)
-- Documentación completa en `translations/README.md`
+Ver [translations/README.md](translations/README.md) para instrucciones de importación.
 
-**Idiomas soportados:**
-- 🇬🇧 Inglés
-- 🇪🇸 Español
-- 🇫🇷 Francés
-- 🇧🇷 Portugués (Brasil)
-- 🇯🇵 Japonés
 
-**Commit:** [Pendiente]
+## Mantenedores
 
----
+- **Admin Notifications Team**
 
-### Problemas Conocidos
+### Contribuyendo
 
-Actualmente no hay problemas conocidos. El módulo está en estado estable.
+Las contribuciones son bienvenidas. Por favor:
 
-### Reportar Bugs
+1. Crear un issue antes de trabajar en nuevas características
+2. Seguir [Drupal Coding Standards](https://www.drupal.org/docs/develop/standards)
+3. Incluir tests para nuevas funcionalidades
+4. Actualizar documentación según sea necesario
 
-Si encuentras un problema:
+Ver [CONTRIBUTING.md](CONTRIBUTING.md) para más detalles.
 
-1. Verifica los logs: `drush watchdog:show --type=admin_notifications --severity=Error`
-2. Revisa la consola del navegador (F12)
-3. Incluye la siguiente información:
-   - Versión de Drupal
-   - Versión de PHP
-   - Navegador y versión
-   - Pasos para reproducir el error
-   - Logs relevantes
 
 ## Licencia
 
-Este módulo es de código abierto y está disponible bajo la licencia GPL-2.0+
+Este proyecto está licenciado bajo GPL-2.0-or-later.
+Ver [LICENSE.txt](LICENSE.txt) para más información.
 
-## Soporte
 
-Para reportar problemas o solicitar nuevas funcionalidades, contacta al equipo de desarrollo.
+## Enlaces
 
-## Créditos
+- **Página del proyecto:** https://www.drupal.org/project/admin_notifications
+- **Documentación:** https://www.drupal.org/docs/contributed-modules/admin-notifications
+- **Issues:** https://www.drupal.org/project/issues/admin_notifications
+- **Git:** https://git.drupalcode.org/project/admin_notifications
 
-Desarrollado para Drupal 10 con PHP 8.3
+
+## Documentación Adicional
+
+- [API.md](API.md) - Documentación completa de la API
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Guía de contribución
+- [CHANGELOG.md](CHANGELOG.md) - Historial de cambios
+- [LOGGING.md](LOGGING.md) - Sistema de logging
+- [EXAMPLES.md](EXAMPLES.md) - Ejemplos de uso
