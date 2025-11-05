@@ -20,6 +20,7 @@ Para enviar informes de bugs, solicitudes de funcionalidades y parches, visite
 - [Uso](#uso)
 - [API para Desarrolladores](#api-para-desarrolladores)
 - [Troubleshooting](#troubleshooting)
+- [Testing](#testing)
 - [Mantenedores](#mantenedores)
 
 
@@ -270,6 +271,32 @@ drush watchdog:show --severity=Error --filter=admin_notifications
 # Ver en tiempo real
 drush watchdog:tail --filter=admin_notifications
 ```
+
+
+## Testing
+
+El módulo incluye tests unitarios para validar la lógica de negocio.
+
+### Ejecutar Unit Tests
+
+```bash
+cd web/modules/push-notification-drupal/admin_notifications
+../../../../vendor/bin/phpunit tests/src/Unit/
+```
+
+Los Unit tests validan:
+- Validación de severidades (info, success, warning, error)
+- Validación de tipos (realtime, banner)
+- Estructura de notificaciones
+- Validación de fechas para notificaciones programadas
+- Validación de longitud de títulos
+
+### Kernel y Functional Tests
+
+Los Kernel tests y Functional tests requieren una instalación completa de Drupal
+con base de datos configurada. Consulta la
+[documentación de PHPUnit de Drupal](https://www.drupal.org/docs/automated-testing/phpunit-in-drupal)
+para más información sobre cómo ejecutar estos tests.
 
 
 ## Traducciones
